@@ -1,6 +1,6 @@
 # MathTris
 
-An educativ Tetris Game!  
+An educational Tetris Game!  
 The goal is to solve a mental calculation to be able to move the tile.
 
 ## Development progress
