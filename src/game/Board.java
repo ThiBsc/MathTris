@@ -66,36 +66,37 @@ public class Board extends JPanel implements KeyListener {
 	private Shape generateShape() {
 		Shape s;
 		Random r = new Random();
+		// Color: https://en.wikipedia.org/wiki/Tetris#Tetromino_colors
 		switch (r.nextInt(7)) {
 		case 0:
-			s = new Shape(Color.cyan, TileShape.ZTile);
+			s = new Shape(Color.red, TileShape.ZTile.getCoords());
 			break;
 		case 1:
-			s = new Shape(Color.red, TileShape.STile);
+			s = new Shape(Color.green, TileShape.STile.getCoords());
 			break;
 		case 2:
-			s = new Shape(Color.magenta, TileShape.JTile);
+			s = new Shape(Color.blue, TileShape.JTile.getCoords());
 			break;
 		case 3:
-			s = new Shape(Color.green, TileShape.LTile);
+			s = new Shape(Color.orange, TileShape.LTile.getCoords());
 			break;
 		case 4:
-			s = new Shape(Color.orange, TileShape.TTile);
+			s = new Shape(new Color(153, 50, 204)/*purple*/, TileShape.TTile.getCoords());
 			break;
 		case 5:
-			s = new Shape(Color.yellow, TileShape.LineTile);
+			s = new Shape(Color.cyan, TileShape.LineTile.getCoords());
 			break;
 		case 6:
-			s = new Shape(Color.cyan, TileShape.SquareTile);
+			s = new Shape(Color.yellow, TileShape.SquareTile.getCoords());
 			break;
 		default:
-			s = new Shape(Color.cyan, TileShape.SquareTile);
+			s = new Shape(Color.yellow, TileShape.SquareTile.getCoords());
 			break;
 		}
 		// Set the initial position of the generated shape
 		// x = (xcase - TileShape xcoord size)/2
 		// y = 0
-		s.setPos((xcase-s.getTileShapeCoords().length)/2, 0);
+		s.setPos((xcase-s.getCoords().length)/2, 0);
 		return s;
 	}
 	
@@ -103,7 +104,7 @@ public class Board extends JPanel implements KeyListener {
 		Color c = currentShape.getColor();
 		int xpos = currentShape.getXPos();
 		int ypos = currentShape.getYPos();
-		boolean[][] coords = currentShape.getTileShapeCoords();
+		boolean[][] coords = currentShape.getCoords();
 		BitSet shapeRowBS = new BitSet(Shape.GRID_SIZE);
 		for (int i=0; i<Shape.GRID_SIZE; i++) {
 			/*
@@ -122,8 +123,18 @@ public class Board extends JPanel implements KeyListener {
 			if (!shapeRowBS.isEmpty()) {
 				for (int change=0; change<Shape.GRID_SIZE; change++) {
 					if (shapeRowBS.get(change)) {
-						gBoard.get(ypos+i).get(xpos+change).key = shapeRowBS.get(change);
+						gBoard.get(ypos+i).get(xpos+change).key = true;
 						gBoard.get(ypos+i).get(xpos+change).value = c;
+						// If the line is complete, remove it
+						boolean completeLine = gBoard.get(ypos+i).stream().filter(p -> p.key).count() == xcase;
+						if (completeLine) {
+							gBoard.remove(ypos+i);
+							// insert a new empty line at the beginning
+							gBoard.add(0, new Vector<>());
+							for (int j=0; j<xcase; j++) {
+								gBoard.get(0).add(new Pair<>(false, Color.white));
+							}
+						}
 					}	
 				}
 			}
@@ -133,29 +144,41 @@ public class Board extends JPanel implements KeyListener {
 	private boolean canMove(Move move) {
 		boolean ret = true;
 		
-		int xpos = currentShape.getXPos();
-		int ypos = currentShape.getYPos();
-		boolean[][] coords = currentShape.getTileShapeCoords();
-		
+		// For R_LEFT and R_RIGHT, we have to copy the array
+		// to avoid change on currentShape
+		// I think we can do better than this
+		boolean[][] old_coords = currentShape.getCoords();
+		boolean[][] coords = new boolean[Shape.GRID_SIZE][Shape.GRID_SIZE];
+		for (int i = 0; i < Shape.GRID_SIZE; i++) {
+		    System.arraycopy(old_coords[i], 0, coords[i], 0, Shape.GRID_SIZE);
+		}
+		Shape potentialNewShape = new Shape(currentShape.getColor(), coords);
+		potentialNewShape.setPos(currentShape.getXPos(), currentShape.getYPos());
 		switch (move) {
 		case LEFT:
-			xpos--;
+			potentialNewShape.moveLeft();
 			break;
 		case RIGHT:
-			xpos++;
+			potentialNewShape.moveRight();
 			break;
 		case R_LEFT:
+			potentialNewShape.rotateLeft();
 			break;
 		case R_RIGHT:
+			potentialNewShape.rotateRight();
 			break;
 		case DOWN:
-			ypos++;
+			potentialNewShape.moveDown();
 			break;
 		default:
 			break;
 		}
+		coords = potentialNewShape.getCoords();
 		
 		// Test if we can move
+		int xpos = potentialNewShape.getXPos();
+		int ypos = potentialNewShape.getYPos();
+		potentialNewShape = null;
 		BitSet shapeRowBS = new BitSet(Shape.GRID_SIZE);
 		BitSet boardRowBS = new BitSet(Shape.GRID_SIZE);
 		for (int i=0; i<Shape.GRID_SIZE && ret==true; i++) {
@@ -225,7 +248,7 @@ public class Board extends JPanel implements KeyListener {
 		// Draw the board rect
 		g.setColor(Color.black);
 		g.drawRect(1, 1, xmax, ymax);
-		g.setColor(Color.darkGray);
+		g.setColor(Color.gray);
 		g.fillRect(1, 1, xmax, ymax);
 		// Draw the grid
 		g.setColor(Color.lightGray);
@@ -243,7 +266,7 @@ public class Board extends JPanel implements KeyListener {
 		int xshape = currentShape.getXPos();
 		int yshape = currentShape.getYPos();
 		int padding=4, arc=10;
-		boolean[][] shape_coords = currentShape.getTileShapeCoords();
+		boolean[][] shape_coords = currentShape.getCoords();
 		for (int i=0; i<Shape.GRID_SIZE; i++) {
 			for (int j=0; j<Shape.GRID_SIZE; j++) {
 				if (shape_coords[j][i]) {
@@ -291,6 +314,11 @@ public class Board extends JPanel implements KeyListener {
 			case KeyEvent.VK_DOWN:
 				if (canMove(Move.R_RIGHT))
 					currentShape.rotateRight();
+				break;
+			case KeyEvent.VK_SPACE:
+				while (canMove(Move.DOWN)) {
+					currentShape.moveDown();
+				}
 				break;
 			case KeyEvent.VK_P:
 				timer.stop();
