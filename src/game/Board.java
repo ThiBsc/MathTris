@@ -101,30 +101,29 @@ public class Board extends JPanel implements KeyListener {
 	}
 	
 	private void updateGameBoard() {
-		Color c = currentShape.getColor();
+		Color color = currentShape.getColor();
 		int xpos = currentShape.getXPos();
 		int ypos = currentShape.getYPos();
 		boolean[][] coords = currentShape.getCoords();
-		BitSet shapeRowBS = new BitSet(Shape.GRID_SIZE);
-		for (int i=0; i<Shape.GRID_SIZE; i++) {
+		int tabLen = coords.length;
+		BitSet shapeRowBS = new BitSet(tabLen);
+		for (int i=0; i<tabLen; i++) {
 			/*
 			 * Get the line of the current shape
 			 * Ex.
 			 * 0100
 			 * 1110 <- curLine
-			 * 0000
 			 * 0000 
 			 */
-			shapeRowBS.set(0, coords[i][0]);
-			shapeRowBS.set(1, coords[i][1]);
-			shapeRowBS.set(2, coords[i][2]);
-			shapeRowBS.set(3, coords[i][3]);
+			for (int c=0; c<tabLen; c++) {
+				shapeRowBS.set(c, coords[i][c]);
+			}
 			
 			if (!shapeRowBS.isEmpty()) {
-				for (int change=0; change<Shape.GRID_SIZE; change++) {
+				for (int change=0; change<tabLen; change++) {
 					if (shapeRowBS.get(change)) {
 						gBoard.get(ypos+i).get(xpos+change).key = true;
-						gBoard.get(ypos+i).get(xpos+change).value = c;
+						gBoard.get(ypos+i).get(xpos+change).value = color;
 						// If the line is complete, remove it
 						boolean completeLine = gBoard.get(ypos+i).stream().filter(p -> p.key).count() == xcase;
 						if (completeLine) {
@@ -148,9 +147,10 @@ public class Board extends JPanel implements KeyListener {
 		// to avoid change on currentShape
 		// I think we can do better than this
 		boolean[][] old_coords = currentShape.getCoords();
-		boolean[][] coords = new boolean[Shape.GRID_SIZE][Shape.GRID_SIZE];
-		for (int i = 0; i < Shape.GRID_SIZE; i++) {
-		    System.arraycopy(old_coords[i], 0, coords[i], 0, Shape.GRID_SIZE);
+		int tabLen = old_coords.length;
+		boolean[][] coords = new boolean[tabLen][tabLen];
+		for (int i = 0; i < tabLen; i++) {
+		    System.arraycopy(old_coords[i], 0, coords[i], 0, tabLen);
 		}
 		Shape potentialNewShape = new Shape(currentShape.getColor(), coords);
 		potentialNewShape.setPos(currentShape.getXPos(), currentShape.getYPos());
@@ -179,21 +179,19 @@ public class Board extends JPanel implements KeyListener {
 		int xpos = potentialNewShape.getXPos();
 		int ypos = potentialNewShape.getYPos();
 		potentialNewShape = null;
-		BitSet shapeRowBS = new BitSet(Shape.GRID_SIZE);
-		BitSet boardRowBS = new BitSet(Shape.GRID_SIZE);
-		for (int i=0; i<Shape.GRID_SIZE && ret==true; i++) {
+		BitSet shapeRowBS = new BitSet(tabLen);
+		BitSet boardRowBS = new BitSet(tabLen);
+		for (int i=0; i<tabLen && ret==true; i++) {
 			/*
 			 * Get the line of the current shape
 			 * Ex.
 			 * 0100
 			 * 1110 <- curLine
 			 * 0000
-			 * 0000 
 			 */
-			shapeRowBS.set(0, coords[i][0]);
-			shapeRowBS.set(1, coords[i][1]);
-			shapeRowBS.set(2, coords[i][2]);
-			shapeRowBS.set(3, coords[i][3]);
+			for (int c=0; c<tabLen; c++) {
+				shapeRowBS.set(c, coords[i][c]);
+			}
 			
 			if (!shapeRowBS.isEmpty()) {
 				if (move == Move.DOWN) {
@@ -202,7 +200,7 @@ public class Board extends JPanel implements KeyListener {
 					if (ypos+i < ycase) {
 						boardRowBS.clear();
 						Vector<Pair<Boolean, Color>> vRow = gBoard.get(ypos+i);
-						for (int vr=0; vr<Shape.GRID_SIZE; vr++) {
+						for (int vr=0; vr<tabLen; vr++) {
 							if (0 <= xpos+vr && xpos+vr < xcase) {
 								boardRowBS.set(vr, vRow.get(xpos+vr).key);
 							}
@@ -214,13 +212,13 @@ public class Board extends JPanel implements KeyListener {
 					}
 				} else {
 					int left = shapeRowBS.nextSetBit(0);
-					int right = shapeRowBS.previousSetBit(Shape.GRID_SIZE-1);
+					int right = shapeRowBS.previousSetBit(tabLen-1);
 					// Check border
 					ret = (0 <= xpos+left) && (xpos+right < xcase);
 					// Check other shapes
 					if (ret) {
 						Vector<Pair<Boolean, Color>> vRow = gBoard.get(ypos+i);
-						for (int vr=0; vr<Shape.GRID_SIZE; vr++) {
+						for (int vr=0; vr<tabLen; vr++) {
 							if (0 <= xpos+vr && xpos+vr < xcase) {
 								boardRowBS.set(vr, vRow.get(xpos+vr).key);
 							}
@@ -244,22 +242,22 @@ public class Board extends JPanel implements KeyListener {
 		int squared = wcase < hcase ? wcase : hcase;
 		int xmax = xcase*squared;
 		int ymax = ycase*squared;
+		int xPlayBegin = (getWidth()/2)-(xmax/2);
 		
 		// Draw the board rect
-		g.setColor(Color.black);
-		g.drawRect(1, 1, xmax, ymax);
 		g.setColor(Color.gray);
-		g.fillRect(1, 1, xmax, ymax);
+		g.fillRect(0, 0, getWidth(), getHeight());
 		// Draw the grid
 		g.setColor(Color.lightGray);
 		for (int i=1; i<xcase; i++) {
 			// Vertical grid
-			g.drawLine(i*squared, 0, i*squared, ymax);
+			g.drawLine(xPlayBegin+i*squared, 0, xPlayBegin+i*squared, ymax);
 			for (int j=1; j<ycase; j++) {
 				// Horizontal grid
-				g.drawLine(0, j*squared, xmax, j*squared);
+				g.drawLine(xPlayBegin, j*squared, xPlayBegin+xmax, j*squared);
 			}
 		}
+		g.drawRect(xPlayBegin, 0, xmax, ymax);
 		
 		// Draw the controllable shape
 		g.setColor(currentShape.getColor());
@@ -267,10 +265,11 @@ public class Board extends JPanel implements KeyListener {
 		int yshape = currentShape.getYPos();
 		int padding=4, arc=10;
 		boolean[][] shape_coords = currentShape.getCoords();
-		for (int i=0; i<Shape.GRID_SIZE; i++) {
-			for (int j=0; j<Shape.GRID_SIZE; j++) {
+		int tabLen = shape_coords.length;
+		for (int i=0; i<tabLen; i++) {
+			for (int j=0; j<tabLen; j++) {
 				if (shape_coords[j][i]) {
-					g.fillRoundRect((xshape+i)*squared+padding,
+					g.fillRoundRect(xPlayBegin+(xshape+i)*squared+padding,
 							(yshape+j)*squared+padding,
 							squared-padding-2,
 							squared-padding-2,
@@ -285,7 +284,7 @@ public class Board extends JPanel implements KeyListener {
 				Pair<Boolean, Color> p = gBoard.get(i).get(j);
 				if (p.key) {
 					g.setColor(p.value);
-					g.fillRoundRect(j*squared+padding,
+					g.fillRoundRect(xPlayBegin+j*squared+padding,
 							i*squared+padding,
 							squared-padding-2,
 							squared-padding-2,

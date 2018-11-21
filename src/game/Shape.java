@@ -4,38 +4,32 @@ import java.awt.Color;
 
 public class Shape {
 	
-	public static final int GRID_SIZE = 4;
 	private Color color;
 	private boolean[][] coords;
 	private int x, y;
 	
 	/**
 	 * Represent a tile with coordinates in a square
-	 * Ex. (TTile)
-	 *  _ _ _ _
-	 * |_|1|_|_|
-	 * |1|1|1|_|
-	 * |_|_|_|_|
-	 * |_|_|_|_|
+	 * Ex. (TTile) All tetrominos must be representated in a square
+	 *  _ _ _ 
+	 * |_|1|_|
+	 * |1|1|1|
+	 * |_|_|_|
 	 */
 	enum TileShape {
 		ZTile(new boolean[][] {
-			{false, true, true, false},
-			{false, false, true, true},
-			{false, false, false, false},
-			{false, false, false, false}
+			{true, true, false},
+			{false, true, true},
+			{false, false, false}
 		}),
 		STile(new boolean[][] {
-			{false, true, true, false},
-			{true, true, false, false},
-			{false, false, false, false},
-			{false, false, false, false}
+			{false, true, true},
+			{true, true, false},
+			{false, false, false}
 		}),
 		SquareTile(new boolean[][] {
-			{false, true, true, false},
-			{false, true, true, false},
-			{false, false, false, false},
-			{false, false, false, false}
+			{true, true},
+			{true, true}
 		}),
 		LineTile(new boolean[][] {
 			{false, true, false, false},
@@ -44,22 +38,19 @@ public class Shape {
 			{false, true, false, false}
 		}),
 		TTile(new boolean[][] {
-			{false, true, false, false},
-			{true, true, true, false},
-			{false, false, false, false},
-			{false, false, false, false}
+			{false, true, false},
+			{true, true, true},
+			{false, false, false}
 		}),
 		LTile(new boolean[][] {
-			{false, true, false, false},
-			{false, true, false, false},
-			{false, true, true, false},
-			{false, false, false, false}
+			{false, true, false},
+			{false, true, false},
+			{false, true, true}
 		}),
 		JTile(new boolean[][] {
-			{false, true, false, false},
-			{false, true, false, false},
-			{true, true, false, false},
-			{false, false, false, false}
+			{false, true, false},
+			{false, true, false},
+			{true, true, false}
 		});
 		
 		private boolean[][] coords;
@@ -125,14 +116,14 @@ public class Shape {
 	 */
 	public void rotateLeft() {
 		if (coords != TileShape.SquareTile.getCoords()) {
+			int tabLen = coords.length;
 			boolean [][] old_coords = coords;
-			boolean [][] new_coords = new boolean[GRID_SIZE][GRID_SIZE];
+			boolean [][] new_coords = new boolean[tabLen][tabLen];
 			// for each row...
-			for (int r=0; r<GRID_SIZE; r++) {
-				new_coords[0][r] = old_coords[r][3];
-				new_coords[1][r] = old_coords[r][2];
-				new_coords[2][r] = old_coords[r][1];
-				new_coords[3][r] = old_coords[r][0];
+			for (int r=0; r<tabLen; r++) {
+				for (int c=0; c<tabLen; c++) {
+					new_coords[c][r] = old_coords[r][(tabLen-1)-c];
+				}
 			}
 			coords = new_coords;
 		}
@@ -140,14 +131,14 @@ public class Shape {
 	
 	public void rotateRight() {
 		if (coords != TileShape.SquareTile.getCoords()) {
+			int tabLen = coords.length;
 			boolean [][] old_coords = coords;
-			boolean [][] new_coords = new boolean[GRID_SIZE][GRID_SIZE];
+			boolean [][] new_coords = new boolean[tabLen][tabLen];
 			// for each row...
-			for (int r=0; r<GRID_SIZE; r++) {
-				new_coords[r][0] = old_coords[3][r];
-				new_coords[r][1] = old_coords[2][r];
-				new_coords[r][2] = old_coords[1][r];
-				new_coords[r][3] = old_coords[0][r];
+			for (int r=0; r<tabLen; r++) {
+				for (int c=0; c<tabLen; c++) {
+					new_coords[r][c] = old_coords[(tabLen-1)-c][r];
+				}
 			}
 			coords = new_coords;
 		}
