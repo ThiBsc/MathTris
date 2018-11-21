@@ -8,6 +8,8 @@ The goal is to solve a mental calculation to be able to move the tile.
 * [x] Move Left/Right
 * [x] Fast down
 * [x] Rotate Left/Right (But you can participate by improving the algorithm)
+* [x] Line count
+* [ ] End game
 * [ ] Score
 * [ ] Game settings
 * [x] Remove complete line

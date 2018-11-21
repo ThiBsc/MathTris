@@ -1,14 +1,14 @@
 package game;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
 
@@ -19,10 +19,10 @@ import game.Shape.TileShape;
 
 public class Board extends JPanel implements KeyListener {
 	
-	private Shape currentShape;
-	private int xcase, ycase;
+	private Shape currentShape, nextShape;
 	private Timer timer;
 	private Vector<Vector<Pair<Boolean, Color>>> gBoard;
+	private int line;
 	
 	enum Move {
 		LEFT,
@@ -34,19 +34,19 @@ public class Board extends JPanel implements KeyListener {
 	
 	public Board() {
 		super();
+		line = 0;
 		// The grid of the game
-		xcase = 10;
-		ycase = 20;
 		gBoard = new Vector<>();
 		// Init rows
-		for (int i=0; i<ycase; i++) {
+		for (int i=0; i<Tetris.YCASE; i++) {
 			gBoard.add(new Vector<>());
 			// Init columns
-			for (int j=0; j<xcase; j++) {
+			for (int j=0; j<Tetris.XCASE; j++) {
 				gBoard.get(i).add(new Pair<>(false, Color.white));
 			}
 		}
 		currentShape = generateShape();
+		nextShape = generateShape();
 		timer = new Timer(500, new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -54,7 +54,8 @@ public class Board extends JPanel implements KeyListener {
 					currentShape.moveDown();
 				} else {
 					updateGameBoard();
-					currentShape = generateShape();
+					currentShape = nextShape;
+					nextShape = generateShape();
 				}
 				repaint();
 			}
@@ -96,7 +97,7 @@ public class Board extends JPanel implements KeyListener {
 		// Set the initial position of the generated shape
 		// x = (xcase - TileShape xcoord size)/2
 		// y = 0
-		s.setPos((xcase-s.getCoords().length)/2, 0);
+		s.setPos((Tetris.XCASE-s.getCoords().length)/2, 0);
 		return s;
 	}
 	
@@ -125,12 +126,13 @@ public class Board extends JPanel implements KeyListener {
 						gBoard.get(ypos+i).get(xpos+change).key = true;
 						gBoard.get(ypos+i).get(xpos+change).value = color;
 						// If the line is complete, remove it
-						boolean completeLine = gBoard.get(ypos+i).stream().filter(p -> p.key).count() == xcase;
+						boolean completeLine = gBoard.get(ypos+i).stream().filter(p -> p.key).count() == Tetris.XCASE;
 						if (completeLine) {
+							line++;
 							gBoard.remove(ypos+i);
 							// insert a new empty line at the beginning
 							gBoard.add(0, new Vector<>());
-							for (int j=0; j<xcase; j++) {
+							for (int j=0; j<Tetris.XCASE; j++) {
 								gBoard.get(0).add(new Pair<>(false, Color.white));
 							}
 						}
@@ -197,11 +199,11 @@ public class Board extends JPanel implements KeyListener {
 				if (move == Move.DOWN) {
 					// Do AND for each line of the current shape and invert result
 					// If the bitset is not 0, you can't move
-					if (ypos+i < ycase) {
+					if (ypos+i < Tetris.YCASE) {
 						boardRowBS.clear();
 						Vector<Pair<Boolean, Color>> vRow = gBoard.get(ypos+i);
 						for (int vr=0; vr<tabLen; vr++) {
-							if (0 <= xpos+vr && xpos+vr < xcase) {
+							if (0 <= xpos+vr && xpos+vr < Tetris.XCASE) {
 								boardRowBS.set(vr, vRow.get(xpos+vr).key);
 							}
 						}
@@ -214,12 +216,12 @@ public class Board extends JPanel implements KeyListener {
 					int left = shapeRowBS.nextSetBit(0);
 					int right = shapeRowBS.previousSetBit(tabLen-1);
 					// Check border
-					ret = (0 <= xpos+left) && (xpos+right < xcase);
+					ret = (0 <= xpos+left) && (xpos+right < Tetris.XCASE);
 					// Check other shapes
 					if (ret) {
 						Vector<Pair<Boolean, Color>> vRow = gBoard.get(ypos+i);
 						for (int vr=0; vr<tabLen; vr++) {
-							if (0 <= xpos+vr && xpos+vr < xcase) {
+							if (0 <= xpos+vr && xpos+vr < Tetris.XCASE) {
 								boardRowBS.set(vr, vRow.get(xpos+vr).key);
 							}
 						}
@@ -237,11 +239,11 @@ public class Board extends JPanel implements KeyListener {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		int wcase = getWidth()/xcase;
-		int hcase = getHeight()/ycase;
+		int wcase = getWidth()/Tetris.XCASE;
+		int hcase = getHeight()/Tetris.YCASE;
 		int squared = wcase < hcase ? wcase : hcase;
-		int xmax = xcase*squared;
-		int ymax = ycase*squared;
+		int xmax = Tetris.XCASE*squared;
+		int ymax = Tetris.YCASE*squared;
 		int xPlayBegin = (getWidth()/2)-(xmax/2);
 		
 		// Draw the board rect
@@ -249,45 +251,48 @@ public class Board extends JPanel implements KeyListener {
 		g.fillRect(0, 0, getWidth(), getHeight());
 		// Draw the grid
 		g.setColor(Color.lightGray);
-		for (int i=1; i<xcase; i++) {
+		for (int i=1; i<Tetris.XCASE; i++) {
 			// Vertical grid
 			g.drawLine(xPlayBegin+i*squared, 0, xPlayBegin+i*squared, ymax);
-			for (int j=1; j<ycase; j++) {
+			for (int j=1; j<Tetris.YCASE; j++) {
 				// Horizontal grid
 				g.drawLine(xPlayBegin, j*squared, xPlayBegin+xmax, j*squared);
 			}
 		}
 		g.drawRect(xPlayBegin, 0, xmax, ymax);
 		
-		// Draw the controllable shape
-		g.setColor(currentShape.getColor());
-		int xshape = currentShape.getXPos();
-		int yshape = currentShape.getYPos();
-		int padding=4, arc=10;
-		boolean[][] shape_coords = currentShape.getCoords();
-		int tabLen = shape_coords.length;
-		for (int i=0; i<tabLen; i++) {
-			for (int j=0; j<tabLen; j++) {
-				if (shape_coords[j][i]) {
-					g.fillRoundRect(xPlayBegin+(xshape+i)*squared+padding,
-							(yshape+j)*squared+padding,
-							squared-padding-2,
-							squared-padding-2,
-							arc, arc);
-				}
-			}
-		}
+		// Display the number of completed line
+		Font f = new Font("Courier New", Font.PLAIN, g.getFont().getSize()*2);
+		g.setColor(Color.white);
+		g.setFont(f);
+		g.drawString(String.format("Line: %d", line), xPlayBegin+xmax+squared, squared);
 		
-		// Draw the gBoard
-		for (int i=0; i<ycase; i++) {
-			for (int j=0; j<xcase; j++) {
+		// Draw the next shape
+		int tabLen = nextShape.getCoords().length - 1;
+		if (tabLen == 1) {
+			// Square
+			tabLen++;
+		}
+		Rectangle r = new Rectangle(xPlayBegin+xmax+squared*2, squared*3, squared*tabLen, squared*tabLen);
+		g.drawString("Next:", xPlayBegin+xmax+squared, squared*2);
+		nextShape.draw(g, r);
+		
+		// Draw the controllable shape
+		tabLen = currentShape.getCoords().length;
+		r.setBounds(xPlayBegin+currentShape.getXPos()*squared, currentShape.getYPos()*squared, squared*tabLen, squared*tabLen);
+		currentShape.draw(g, r);
+		
+		// Draw the gBoard (dead tetrominos)
+		int arc = currentShape.getArc();
+		for (int i=0; i<Tetris.YCASE; i++) {
+			for (int j=0; j<Tetris.XCASE; j++) {
 				Pair<Boolean, Color> p = gBoard.get(i).get(j);
 				if (p.key) {
 					g.setColor(p.value);
-					g.fillRoundRect(xPlayBegin+j*squared+padding,
-							i*squared+padding,
-							squared-padding-2,
-							squared-padding-2,
+					g.fillRoundRect(xPlayBegin+j*squared+1,
+							i*squared+1,
+							squared-1,
+							squared-1,
 							arc, arc);
 				}
 			}

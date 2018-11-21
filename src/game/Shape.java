@@ -1,12 +1,14 @@
 package game;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 
 public class Shape {
 	
 	private Color color;
 	private boolean[][] coords;
-	private int x, y;
+	private int x, y, arc;
 	
 	/**
 	 * Represent a tile with coordinates in a square
@@ -72,6 +74,7 @@ public class Shape {
 		color = c;
 		this.coords = coords;
 		x = y = 0;
+		arc = 10;
 	}
 	
 	public Color getColor() {
@@ -93,6 +96,10 @@ public class Shape {
 	
 	public int getYPos() {
 		return y;
+	}
+	
+	public int getArc() {
+		return arc;
 	}
 	
 	public void moveDown() {
@@ -141,6 +148,23 @@ public class Shape {
 				}
 			}
 			coords = new_coords;
+		}
+	}
+	
+	public void draw(Graphics g, Rectangle rect) {
+		int squared = rect.width/coords.length;
+		g.setColor(color);
+		int tabLen = coords.length;
+		for (int i=0; i<tabLen; i++) {
+			for (int j=0; j<tabLen; j++) {
+				if (coords[j][i]) {
+					g.fillRoundRect(rect.x+i*squared+1,
+							rect.y+j*squared+1,
+							squared-1,
+							squared-1,
+							arc, arc);
+				}
+			}
 		}
 	}
 
