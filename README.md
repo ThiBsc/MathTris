@@ -9,6 +9,7 @@ The goal is to solve a mental calculation to be able to move the tile.
 * [x] Fast down
 * [x] Rotate Left/Right (But you can participate by improving the algorithm)
 * [x] Line count
+* [x] Equation mode (default)
 * [ ] End game
 * [ ] Score
 * [ ] Game settings

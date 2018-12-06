@@ -2,6 +2,7 @@ package game;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -16,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import game.Shape.TileShape;
+import generator.EquationGenerator;
 
 public class Board extends JPanel implements KeyListener {
 	
@@ -23,6 +25,10 @@ public class Board extends JPanel implements KeyListener {
 	private Timer timer;
 	private Vector<Vector<Pair<Boolean, Color>>> gBoard;
 	private int line;
+	private Mode mode;
+	private EquationGenerator equation;
+	private String answer;
+	private boolean isAnswered;
 	
 	enum Move {
 		LEFT,
@@ -35,6 +41,10 @@ public class Board extends JPanel implements KeyListener {
 	public Board() {
 		super();
 		line = 0;
+		mode = Mode.MATH;
+		equation = new EquationGenerator();
+		answer = "";
+		isAnswered = false;
 		// The grid of the game
 		gBoard = new Vector<>();
 		// Init rows
@@ -73,7 +83,7 @@ public class Board extends JPanel implements KeyListener {
 			s = new Shape(Color.red, TileShape.ZTile.getCoords());
 			break;
 		case 1:
-			s = new Shape(Color.green, TileShape.STile.getCoords());
+			s = new Shape(Color.green.darker(), TileShape.STile.getCoords());
 			break;
 		case 2:
 			s = new Shape(Color.blue, TileShape.JTile.getCoords());
@@ -94,6 +104,9 @@ public class Board extends JPanel implements KeyListener {
 			s = new Shape(Color.yellow, TileShape.SquareTile.getCoords());
 			break;
 		}
+		equation.generate();
+		answer = "";
+		isAnswered = false;
 		// Set the initial position of the generated shape
 		// x = (xcase - TileShape xcoord size)/2
 		// y = 0
@@ -297,6 +310,27 @@ public class Board extends JPanel implements KeyListener {
 				}
 			}
 		}
+		
+		if (mode == Mode.MATH && !isAnswered) {
+			// Draw the math equation
+			Color question_color = new Color(255, 255, 255, 100);
+			g.setColor(question_color);
+			g.fillRect(xPlayBegin, 0, xmax, ymax);
+			Font question_font = new Font(f.getName(), Font.BOLD, f.getSize());
+			FontMetrics fm = g.getFontMetrics(question_font);
+			int size = question_font.getSize();
+			int y_pos = ymax/2 - fm.getHeight();
+			while (fm.stringWidth(equation.toString()) < xmax) {
+				fm = g.getFontMetrics(question_font.deriveFont((float)size++));
+			}
+			size--;
+			g.setColor(Color.black);
+			g.setFont(question_font.deriveFont((float)size));
+			g.drawString(equation.toString(), xPlayBegin, y_pos);
+			// Draw the answer
+			int answer_width = fm.stringWidth(answer);
+			g.drawString(answer, xPlayBegin+(xmax/2-answer_width/2), y_pos+fm.getHeight());
+		}
 	}
 
 	@Override
@@ -304,28 +338,48 @@ public class Board extends JPanel implements KeyListener {
 		if (timer.isRunning()) {
 			switch (e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
-				if (canMove(Move.LEFT))
+				if (canMove(Move.LEFT) && isAnswered)
 					currentShape.moveLeft();
 				break;
 			case KeyEvent.VK_RIGHT:
-				if (canMove(Move.RIGHT))
+				if (canMove(Move.RIGHT) && isAnswered)
 					currentShape.moveRight();
 				break;
 			case KeyEvent.VK_UP:
-				if (canMove(Move.R_LEFT))
+				if (canMove(Move.R_LEFT) && isAnswered)
 					currentShape.rotateLeft();
 				break;
 			case KeyEvent.VK_DOWN:
-				if (canMove(Move.R_RIGHT))
+				if (canMove(Move.R_RIGHT) && isAnswered)
 					currentShape.rotateRight();
 				break;
 			case KeyEvent.VK_SPACE:
-				while (canMove(Move.DOWN)) {
+				while (canMove(Move.DOWN) && isAnswered) {
 					currentShape.moveDown();
 				}
 				break;
 			case KeyEvent.VK_P:
 				timer.stop();
+				break;
+			case KeyEvent.VK_0:
+			case KeyEvent.VK_1:
+			case KeyEvent.VK_2:
+			case KeyEvent.VK_3:
+			case KeyEvent.VK_4:
+			case KeyEvent.VK_5:
+			case KeyEvent.VK_6:
+			case KeyEvent.VK_7:
+			case KeyEvent.VK_8:
+			case KeyEvent.VK_9:
+				answer += String.valueOf(e.getKeyChar());
+				break;
+			case KeyEvent.VK_BACK_SPACE:
+				if (answer.length()>0) {
+					answer = answer.substring(0, answer.length()-1);
+				}
+				break;
+			case KeyEvent.VK_ENTER:
+				isAnswered = equation.answer(Integer.parseInt(answer));
 				break;
 			default:
 				break;
