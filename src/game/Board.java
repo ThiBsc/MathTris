@@ -49,7 +49,7 @@ public class Board extends JPanel implements KeyListener {
 		gBoard = new Vector<>();
 		// Init rows
 		for (int i=0; i<Tetris.YCASE; i++) {
-			gBoard.add(new Vector<>());
+			gBoard.add(new Vector<Pair<Boolean, Color>>());
 			// Init columns
 			for (int j=0; j<Tetris.XCASE; j++) {
 				gBoard.get(i).add(new Pair<>(false, Color.white));
@@ -336,6 +336,7 @@ public class Board extends JPanel implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (timer.isRunning()) {
+			System.out.println(e);
 			switch (e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
 				if (canMove(Move.LEFT) && isAnswered)
@@ -371,6 +372,16 @@ public class Board extends JPanel implements KeyListener {
 			case KeyEvent.VK_7:
 			case KeyEvent.VK_8:
 			case KeyEvent.VK_9:
+			case KeyEvent.VK_NUMPAD0:
+			case KeyEvent.VK_NUMPAD1:
+			case KeyEvent.VK_NUMPAD2:
+			case KeyEvent.VK_NUMPAD3:
+			case KeyEvent.VK_NUMPAD4:
+			case KeyEvent.VK_NUMPAD5:
+			case KeyEvent.VK_NUMPAD6:
+			case KeyEvent.VK_NUMPAD7:
+			case KeyEvent.VK_NUMPAD8:
+			case KeyEvent.VK_NUMPAD9:
 				answer += String.valueOf(e.getKeyChar());
 				break;
 			case KeyEvent.VK_BACK_SPACE:
