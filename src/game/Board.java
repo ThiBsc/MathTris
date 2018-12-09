@@ -336,7 +336,6 @@ public class Board extends JPanel implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (timer.isRunning()) {
-			System.out.println(e);
 			switch (e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
 				if (canMove(Move.LEFT) && isAnswered)
