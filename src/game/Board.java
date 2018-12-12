@@ -72,6 +72,7 @@ public class Board extends JPanel implements KeyListener {
 		});
 		addKeyListener(this);
 		setFocusable(true);
+		setRequestFocusEnabled(true);
 	}
 	
 	private Shape generateShape() {

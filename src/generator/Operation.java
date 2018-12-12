@@ -5,8 +5,8 @@ public enum Operation {
 	ADDITION("+"),
 	SUBSTRACTION("-"),
 	MULTIPLICATION("x"),
-	DIVISION("÷"),
-	EUCLIDIAN_DIVISION("R÷");
+	DIVISION("÷");
+	//EUCLIDIAN_DIVISION("R÷");
 	
 	private String op;
 	
