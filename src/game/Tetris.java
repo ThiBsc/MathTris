@@ -14,13 +14,15 @@ public class Tetris extends JFrame {
 	public Tetris() {
 		super("MathTris!");
 
-		toolBar = new ToolBar(JToolBar.HORIZONTAL);
 		board = new Board();
+		toolBar = new ToolBar(board, JToolBar.HORIZONTAL);
 		
-		//add(toolBar, BorderLayout.NORTH);
+		add(toolBar, BorderLayout.NORTH);
 		add(board, BorderLayout.CENTER);
 
+		pack();
 		setSize(700, 600);
+		board.requestFocusInWindow();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 	

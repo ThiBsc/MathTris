@@ -1,16 +1,12 @@
 package game;
 
-import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 /**
@@ -23,14 +19,17 @@ public class ToolBar extends JToolBar implements ActionListener {
 	 * Icons made by "https://www.freepik.com/" from "https://www.flaticon.com/" is licensed by CC 3.0 BY
 	 */
 	private JButton btnSettings;
+	private Board board;
 
-	public ToolBar() {
+	public ToolBar(Board board) {
 		super("ToolBar");
+		this.board = board;
 		init();
 	}
 
-	public ToolBar(int orientation) {
+	public ToolBar(Board board, int orientation) {
 		super("ToolBar", orientation);
+		this.board = board;
 		init();
 	}
 	
@@ -65,6 +64,7 @@ public class ToolBar extends JToolBar implements ActionListener {
 		default:
 			break;
 		}
+		board.requestFocusInWindow();
 	}
 
 }
