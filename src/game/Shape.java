@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
+/**
+ * @author thibdev
+ */
 public class Shape {
 	
 	private Color color;

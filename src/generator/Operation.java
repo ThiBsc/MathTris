@@ -1,5 +1,8 @@
 package generator;
 
+/**
+ * @author thibdev
+ */
 public enum Operation {
 	
 	ADDITION("+"),

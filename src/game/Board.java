@@ -19,6 +19,9 @@ import javax.swing.Timer;
 import game.Shape.TileShape;
 import generator.EquationGenerator;
 
+/**
+ * @author thibdev
+ */
 public class Board extends JPanel implements KeyListener {
 	
 	private Shape currentShape, nextShape;

@@ -5,6 +5,9 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JToolBar;
 
+/**
+ * @author thibdev
+ */
 public class Tetris extends JFrame {
 	
 	public static final int XCASE=10, YCASE=20;

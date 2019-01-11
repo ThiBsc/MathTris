@@ -1,5 +1,12 @@
 package game;
 
+/**
+ * 
+ * @author thibdev
+ *
+ * @param <K> Key
+ * @param <V> Value
+ */
 public class Pair<K, V> {
 
 	K key;
