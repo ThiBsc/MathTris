@@ -78,6 +78,10 @@ public class Board extends JPanel implements KeyListener {
 		setRequestFocusEnabled(true);
 	}
 	
+	public EquationGenerator getEquationGenerator() {
+		return equation;
+	}
+	
 	private Shape generateShape() {
 		Shape s;
 		Random r = new Random();

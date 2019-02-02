@@ -31,6 +31,10 @@ public class EquationGenerator {
 		}
 	}
 	
+	public TreeSet<Integer> getTable(){
+		return tableSet;
+	}
+	
 	public void setTable(String tableStr) {
 		tableSet.clear();
 		String[] tables = tableStr.split("[\\s,;]");

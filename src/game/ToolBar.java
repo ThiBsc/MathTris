@@ -7,7 +7,11 @@ import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+
+import generator.EquationGenerator;
 
 /**
  * @author thibdev
@@ -19,16 +23,19 @@ public class ToolBar extends JToolBar implements ActionListener {
 	 * Icons made by "https://www.freepik.com/" from "https://www.flaticon.com/" is licensed by CC 3.0 BY
 	 */
 	private JButton btnSettings;
+	private JFrame parent;
 	private Board board;
 
-	public ToolBar(Board board) {
+	public ToolBar(JFrame parent, Board board) {
 		super("ToolBar");
+		this.parent = parent;
 		this.board = board;
 		init();
 	}
 
-	public ToolBar(Board board, int orientation) {
+	public ToolBar(JFrame parent, Board board, int orientation) {
 		super("ToolBar", orientation);
+		this.parent = parent;
 		this.board = board;
 		init();
 	}
@@ -60,6 +67,14 @@ public class ToolBar extends JToolBar implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		switch (e.getActionCommand()) {
 		case "settings":
+			SettingOptionPane sop = new SettingOptionPane();
+			sop.setTables(board.getEquationGenerator().getTable());
+			if (sop.displaySettings() == JOptionPane.OK_OPTION) {
+				EquationGenerator eg = board.getEquationGenerator();
+				eg.setTable(sop.getTables());
+				eg.generate();
+				board.repaint();
+			}
 			break;
 		default:
 			break;

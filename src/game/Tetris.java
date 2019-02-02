@@ -18,7 +18,7 @@ public class Tetris extends JFrame {
 		super("MathTris!");
 
 		board = new Board();
-		toolBar = new ToolBar(board, JToolBar.HORIZONTAL);
+		toolBar = new ToolBar(this, board, JToolBar.HORIZONTAL);
 		
 		add(toolBar, BorderLayout.NORTH);
 		add(board, BorderLayout.CENTER);
