@@ -1,6 +1,9 @@
 package game;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 import javax.swing.JToolBar;
@@ -24,7 +27,8 @@ public class Tetris extends JFrame {
 		add(board, BorderLayout.CENTER);
 
 		pack();
-		setSize(700, 600);
+		setSize(450, 600);
+		setMinimumSize(new Dimension(350, 450));
 		board.requestFocusInWindow();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}

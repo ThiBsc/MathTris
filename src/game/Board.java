@@ -31,7 +31,7 @@ public class Board extends JPanel implements KeyListener {
 	private Mode mode;
 	private EquationGenerator equation;
 	private String answer;
-	private boolean isAnswered;
+	private boolean isAnswered, gameOver;
 	
 	enum Move {
 		LEFT,
@@ -47,7 +47,7 @@ public class Board extends JPanel implements KeyListener {
 		mode = Mode.MATH;
 		equation = new EquationGenerator();
 		answer = "";
-		isAnswered = false;
+		isAnswered = gameOver = false;
 		// The grid of the game
 		gBoard = new Vector<>();
 		// Init rows
@@ -66,9 +66,14 @@ public class Board extends JPanel implements KeyListener {
 				if (canMove(Move.DOWN)) {
 					currentShape.moveDown();
 				} else {
-					updateGameBoard();
-					currentShape = nextShape;
-					nextShape = generateShape();
+					if (!gameOver) {
+						updateGameBoard();
+						currentShape = nextShape;
+						nextShape = generateShape();
+						if (!canMove(Move.DOWN)) {
+							gameOver = true;
+						}
+					}
 				}
 				repaint();
 			}
@@ -260,16 +265,40 @@ public class Board extends JPanel implements KeyListener {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		int wcase = getWidth()/Tetris.XCASE;
+		// Font for game info
+		Font f = new Font("Courier New", Font.PLAIN, g.getFont().getSize()*2);
+		FontMetrics fm = g.getFontMetrics(f);
+		int right_offset = fm.stringWidth(String.format("Line: %d", line));
+		
+		int available_width = (getWidth()-right_offset)/Tetris.XCASE;
+		int available_height = getHeight()/Tetris.YCASE;
+		int squared = available_width < available_height ? available_width : available_height;
+		int wcase = (getWidth()-right_offset-squared)/Tetris.XCASE;
 		int hcase = getHeight()/Tetris.YCASE;
-		int squared = wcase < hcase ? wcase : hcase;
+		squared = wcase < hcase ? wcase : hcase;
 		int xmax = Tetris.XCASE*squared;
 		int ymax = Tetris.YCASE*squared;
-		int xPlayBegin = (getWidth()/2)-(xmax/2);
-		
+
 		// Draw the board rect
 		g.setColor(Color.gray);
 		g.fillRect(0, 0, getWidth(), getHeight());
+		
+		// Display the number of completed line
+		g.setColor(Color.white);
+		g.setFont(f);
+		g.drawString(String.format("Line: %d", line), getWidth()-(right_offset+squared), squared);
+		// Draw the next shape
+		int tabLen = nextShape.getCoords().length - 1;
+		if (tabLen == 1) {
+			// Square
+			tabLen++;
+		}
+		Rectangle r = new Rectangle(getWidth()-(right_offset), squared*3, squared*tabLen, squared*tabLen);
+		g.drawString("Next:", getWidth()-(right_offset+squared), squared*2);
+		nextShape.draw(g, r);
+		
+		int xPlayBegin = ((getWidth()-(right_offset+squared))/2)-(xmax/2);
+		
 		// Draw the grid
 		g.setColor(Color.lightGray);
 		for (int i=1; i<Tetris.XCASE; i++) {
@@ -281,22 +310,6 @@ public class Board extends JPanel implements KeyListener {
 			}
 		}
 		g.drawRect(xPlayBegin, 0, xmax, ymax);
-		
-		// Display the number of completed line
-		Font f = new Font("Courier New", Font.PLAIN, g.getFont().getSize()*2);
-		g.setColor(Color.white);
-		g.setFont(f);
-		g.drawString(String.format("Line: %d", line), xPlayBegin+xmax+squared, squared);
-		
-		// Draw the next shape
-		int tabLen = nextShape.getCoords().length - 1;
-		if (tabLen == 1) {
-			// Square
-			tabLen++;
-		}
-		Rectangle r = new Rectangle(xPlayBegin+xmax+squared*2, squared*3, squared*tabLen, squared*tabLen);
-		g.drawString("Next:", xPlayBegin+xmax+squared, squared*2);
-		nextShape.draw(g, r);
 		
 		// Draw the controllable shape
 		tabLen = currentShape.getCoords().length;
@@ -319,31 +332,40 @@ public class Board extends JPanel implements KeyListener {
 			}
 		}
 		
-		if (mode == Mode.MATH && !isAnswered) {
-			// Draw the math equation
-			Color question_color = new Color(255, 255, 255, 100);
-			g.setColor(question_color);
-			g.fillRect(xPlayBegin, 0, xmax, ymax);
-			Font question_font = new Font(f.getName(), Font.BOLD, f.getSize());
-			FontMetrics fm = g.getFontMetrics(question_font);
-			int size = question_font.getSize();
-			int y_pos = ymax/2 - fm.getHeight();
-			while (fm.stringWidth(equation.toString()) < xmax) {
-				fm = g.getFontMetrics(question_font.deriveFont((float)size++));
+		// Setting font
+		Font question_font = new Font(f.getName(), Font.BOLD, f.getSize());
+		fm = g.getFontMetrics(question_font);
+		int size = question_font.getSize();
+		int y_pos = ymax/2 - fm.getHeight();
+		while (fm.stringWidth(equation.toString()) < xmax) {
+			fm = g.getFontMetrics(question_font.deriveFont((float)size++));
+		}
+		size--;
+		g.setFont(question_font.deriveFont((float)size));
+		
+		if (gameOver) {
+			// Draw "Game over"
+			int gameover_width = fm.stringWidth("Game over!");
+			g.setColor(Color.white);
+			g.drawString("Game over!", xPlayBegin+(xmax/2-gameover_width/2), y_pos+fm.getHeight());
+		} else {
+			if (mode == Mode.MATH && !isAnswered) {
+				// Draw the math equation
+				Color question_color = new Color(255, 255, 255, 100);
+				g.setColor(question_color);
+				g.fillRect(xPlayBegin, 0, xmax, ymax);
+				g.setColor(Color.black);
+				g.drawString(equation.toString(), xPlayBegin, y_pos);
+				// Draw the answer
+				int answer_width = fm.stringWidth(answer);
+				g.drawString(answer, xPlayBegin+(xmax/2-answer_width/2), y_pos+fm.getHeight());
 			}
-			size--;
-			g.setColor(Color.black);
-			g.setFont(question_font.deriveFont((float)size));
-			g.drawString(equation.toString(), xPlayBegin, y_pos);
-			// Draw the answer
-			int answer_width = fm.stringWidth(answer);
-			g.drawString(answer, xPlayBegin+(xmax/2-answer_width/2), y_pos+fm.getHeight());
 		}
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (timer.isRunning()) {
+		if (timer.isRunning() && !gameOver) {
 			switch (e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
 				if (canMove(Move.LEFT) && isAnswered)

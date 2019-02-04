@@ -10,7 +10,8 @@ The goal is to solve a mental calculation to be able to move the tile.
 * [x] Rotate Left/Right (But you can participate by improving the algorithm)
 * [x] Line count
 * [x] Equation mode (default)
-* [ ] End game
+* [x] End game
+* [ ] New game
 * [ ] Score
 * [ ] Game settings
 * [x] Remove complete line
