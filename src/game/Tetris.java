@@ -22,6 +22,8 @@ public class Tetris extends JFrame {
 
 		board = new Board();
 		toolBar = new ToolBar(this, board, JToolBar.HORIZONTAL);
+		// Not the best solution but it's until we have something better
+		board.setToolBar(toolBar);
 		
 		add(toolBar, BorderLayout.NORTH);
 		add(board, BorderLayout.CENTER);

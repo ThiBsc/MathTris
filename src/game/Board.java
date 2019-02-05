@@ -32,6 +32,7 @@ public class Board extends JPanel implements KeyListener {
 	private EquationGenerator equation;
 	private String answer;
 	private boolean isAnswered, gameOver;
+	private ToolBar toolBar;
 	
 	enum Move {
 		LEFT,
@@ -72,6 +73,8 @@ public class Board extends JPanel implements KeyListener {
 						nextShape = generateShape();
 						if (!canMove(Move.DOWN)) {
 							gameOver = true;
+							timer.stop();
+							toolBar.setNewGameButton();
 						}
 					}
 				}
@@ -83,8 +86,40 @@ public class Board extends JPanel implements KeyListener {
 		setRequestFocusEnabled(true);
 	}
 	
+	public void setToolBar(ToolBar toolBar) {
+		this.toolBar = toolBar;
+	}
+	
 	public EquationGenerator getEquationGenerator() {
 		return equation;
+	}
+	
+	public void play() {
+		timer.start();
+		// To display the equation quickly
+		repaint();
+	}
+	
+	public void pause() {
+		timer.stop();
+		// Force repaint to remove equation during pause
+		repaint();
+	}
+	
+	public void newGame() {
+		line = 0;
+		answer = "";
+		isAnswered = gameOver = false;
+		// Reset game
+		for (int i=0; i<Tetris.YCASE; i++) {
+			for (int j=0; j<Tetris.XCASE; j++) {
+				gBoard.get(i).get(j).key = false;
+				gBoard.get(i).get(j).value = Color.white;
+			}
+		}
+		currentShape = generateShape();
+		nextShape = generateShape();
+		repaint();
 	}
 	
 	private Shape generateShape() {
@@ -346,6 +381,7 @@ public class Board extends JPanel implements KeyListener {
 		if (gameOver) {
 			// Draw "Game over"
 			int gameover_width = fm.stringWidth("Game over!");
+			g.setFont(question_font.deriveFont((float)size-1));
 			g.setColor(Color.white);
 			g.drawString("Game over!", xPlayBegin+(xmax/2-gameover_width/2), y_pos+fm.getHeight());
 		} else {
@@ -354,11 +390,13 @@ public class Board extends JPanel implements KeyListener {
 				Color question_color = new Color(255, 255, 255, 100);
 				g.setColor(question_color);
 				g.fillRect(xPlayBegin, 0, xmax, ymax);
-				g.setColor(Color.black);
-				g.drawString(equation.toString(), xPlayBegin, y_pos);
-				// Draw the answer
-				int answer_width = fm.stringWidth(answer);
-				g.drawString(answer, xPlayBegin+(xmax/2-answer_width/2), y_pos+fm.getHeight());
+				if (timer.isRunning()) {
+					g.setColor(Color.black);
+					g.drawString(equation.toString(), xPlayBegin, y_pos);
+					// Draw the answer
+					int answer_width = fm.stringWidth(answer);
+					g.drawString(answer, xPlayBegin+(xmax/2-answer_width/2), y_pos+fm.getHeight());
+				}
 			}
 		}
 	}
@@ -387,9 +425,6 @@ public class Board extends JPanel implements KeyListener {
 				while (canMove(Move.DOWN) && isAnswered) {
 					currentShape.moveDown();
 				}
-				break;
-			case KeyEvent.VK_P:
-				timer.stop();
 				break;
 			case KeyEvent.VK_0:
 			case KeyEvent.VK_1:
@@ -424,14 +459,6 @@ public class Board extends JPanel implements KeyListener {
 			default:
 				break;
 			}	
-		} else {
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_P:
-				timer.start();
-				break;
-			default:
-				break;
-			}
 		}
 		repaint();
 	}
