@@ -86,6 +86,14 @@ public class Board extends JPanel implements KeyListener {
 		setRequestFocusEnabled(true);
 	}
 	
+	public Mode getMode() {
+		return mode;
+	}
+	
+	public void setMode(Mode m) {
+		mode = m;
+	}
+	
 	public void setToolBar(ToolBar toolBar) {
 		this.toolBar = toolBar;
 	}
@@ -119,7 +127,7 @@ public class Board extends JPanel implements KeyListener {
 		}
 		currentShape = generateShape();
 		nextShape = generateShape();
-		repaint();
+		pause();
 	}
 	
 	private Shape generateShape() {
@@ -406,23 +414,23 @@ public class Board extends JPanel implements KeyListener {
 		if (timer.isRunning() && !gameOver) {
 			switch (e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
-				if (canMove(Move.LEFT) && isAnswered)
+				if (canMove(Move.LEFT) && (isAnswered || mode == Mode.CLASSIC))
 					currentShape.moveLeft();
 				break;
 			case KeyEvent.VK_RIGHT:
-				if (canMove(Move.RIGHT) && isAnswered)
+				if (canMove(Move.RIGHT) && (isAnswered || mode == Mode.CLASSIC))
 					currentShape.moveRight();
 				break;
 			case KeyEvent.VK_UP:
-				if (canMove(Move.R_LEFT) && isAnswered)
+				if (canMove(Move.R_LEFT) && (isAnswered || mode == Mode.CLASSIC))
 					currentShape.rotateLeft();
 				break;
 			case KeyEvent.VK_DOWN:
-				if (canMove(Move.R_RIGHT) && isAnswered)
+				if (canMove(Move.R_RIGHT) && (isAnswered || mode == Mode.CLASSIC))
 					currentShape.rotateRight();
 				break;
 			case KeyEvent.VK_SPACE:
-				while (canMove(Move.DOWN) && isAnswered) {
+				while (canMove(Move.DOWN) && (isAnswered || mode == Mode.CLASSIC)) {
 					currentShape.moveDown();
 				}
 				break;

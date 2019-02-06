@@ -89,10 +89,14 @@ public class ToolBar extends JToolBar implements ActionListener {
 		case "settings":
 			SettingOptionPane sop = new SettingOptionPane();
 			sop.setTables(board.getEquationGenerator().getTable());
+			sop.setOperations(board.getEquationGenerator().getOperation());
+			sop.setModeMath(board.getMode() == Mode.MATH);
 			if (sop.displaySettings() == JOptionPane.OK_OPTION) {
 				EquationGenerator eg = board.getEquationGenerator();
+				eg.setOperation(sop.getOperations());
 				eg.setTable(sop.getTables());
 				eg.generate();
+				board.setMode(sop.isModeMath() ? Mode.MATH : Mode.CLASSIC);
 				board.repaint();
 			}
 			break;

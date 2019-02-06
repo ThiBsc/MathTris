@@ -24,10 +24,30 @@ public class EquationGenerator {
 		setTable("1 2 3 4 5 6 7 8 9");
 	}
 	
-	public void setOperation(Operation[] ops) {
+	public TreeSet<Operation> getOperation(){
+		return opSet;
+	}
+	
+	public void setOperation(String ops) {
 		opSet.clear();
-		for (Operation op : ops) {
-			opSet.add(op);
+		String[] operations = ops.split("[\\s,;]");
+		for (String op : operations) {
+			switch (op) {
+			case "+":
+				opSet.add(Operation.ADDITION);
+				break;
+			case "-":
+				opSet.add(Operation.SUBSTRACTION);
+				break;
+			case "x":
+				opSet.add(Operation.MULTIPLICATION);
+				break;
+			case "÷":
+				opSet.add(Operation.DIVISION);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 	

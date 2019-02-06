@@ -13,7 +13,7 @@ The goal is to solve a mental calculation to be able to move the tile.
 * [x] End game
 * [ ] New game
 * [ ] Score
-* [ ] Game settings
+* [x] Game settings
 * [x] Remove complete line
 * [x] Collision management
 * [x] Pause
