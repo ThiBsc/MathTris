@@ -33,6 +33,7 @@ public class Board extends JPanel implements KeyListener {
 	private String answer;
 	private boolean isAnswered, gameOver;
 	private ToolBar toolBar;
+	public static int timer_delay = 500;  
 	
 	enum Move {
 		LEFT,
@@ -61,7 +62,7 @@ public class Board extends JPanel implements KeyListener {
 		}
 		currentShape = generateShape();
 		nextShape = generateShape();
-		timer = new Timer(500, new ActionListener() {			
+		timer = new Timer(timer_delay, new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (canMove(Move.DOWN)) {
@@ -71,6 +72,13 @@ public class Board extends JPanel implements KeyListener {
 						updateGameBoard();
 						currentShape = nextShape;
 						nextShape = generateShape();
+						if (mode == Mode.CLASSIC && line%5 == 0) {
+							// increase speed in classic mode each 5 lines
+							if (timer_delay > 200) {
+								timer_delay -= 20;
+								timer.setDelay(timer_delay);
+							}
+						}
 						if (!canMove(Move.DOWN)) {
 							gameOver = true;
 							timer.stop();
@@ -117,6 +125,8 @@ public class Board extends JPanel implements KeyListener {
 	public void newGame() {
 		line = 0;
 		answer = "";
+		timer_delay = 500;
+		timer.setDelay(timer_delay);
 		isAnswered = gameOver = false;
 		// Reset game
 		for (int i=0; i<Tetris.YCASE; i++) {

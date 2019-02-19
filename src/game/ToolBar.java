@@ -97,7 +97,7 @@ public class ToolBar extends JToolBar implements ActionListener {
 				eg.setTable(sop.getTables());
 				eg.generate();
 				board.setMode(sop.isModeMath() ? Mode.MATH : Mode.CLASSIC);
-				board.repaint();
+				board.newGame();
 			}
 			break;
 		case "play":

@@ -83,5 +83,7 @@ public class SettingOptionPane extends JOptionPane {
 	
 	public void setModeMath(boolean math) {
 		chkModeMath.setSelected(math);
+		txtTable.setEnabled(chkModeMath.isSelected());
+		txtOperation.setEnabled(chkModeMath.isSelected());
 	}
 }
